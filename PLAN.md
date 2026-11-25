@@ -1,7 +1,7 @@
 # Implementation plan
 
 ## First workflow
-A user adds a few restaurants, closes and reopens the app, chooses filters (price, food type, walking minutes), presses Choose, and sees one restaurant that matches all the filters — or a clear "no match" message.
+A user adds a few restaurants, closes and reopens the app, chooses filters (price and food type), presses Choose, and sees one restaurant that matches all the filters — or a clear "no match" message.
 
 ## Steps
 1. Project setup: folders, `requirements.txt`, pytest working. Check: `pytest` runs. (Krittithee)
