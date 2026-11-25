@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+
+# The app's saved restaurant list (each person's own data, not code)
+saved/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
