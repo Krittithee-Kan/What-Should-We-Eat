@@ -1,15 +1,5 @@
 """Small presentation adapters; application rules remain in ``app.logic``."""
 
-PRICE_OPTIONS = {
-    "Any price": None,
-    "Up to ฿60": 60,
-    "Up to ฿100": 100,
-    "Up to ฿150": 150,
-    "Up to ฿200": 200,
-    "Up to ฿300": 300,
-    "Up to ฿500": 500,
-}
-
 CUISINE_LABELS = {
     "thai": "Thai",
     "japanese": "Japanese",
@@ -38,13 +28,21 @@ CATEGORY_LABELS = {
 }
 
 
-def build_filters(price_label, cuisines, categories):
+def build_filters(max_price, price_ceiling, cuisines, categories):
     """Translate screen state to the input contract used by filter logic."""
+    effective_max = None if max_price >= price_ceiling else int(max_price)
     return {
-        "max_price": PRICE_OPTIONS[price_label],
+        "max_price": effective_max,
         "cuisines": list(cuisines),
         "categories": list(categories),
     }
+
+
+def format_price_limit(max_price, price_ceiling):
+    """Describe the current maximum-price slider position."""
+    if max_price >= price_ceiling:
+        return "Any price"
+    return f"Up to {format_price(max_price)}"
 
 
 def format_price(price):
@@ -55,3 +53,18 @@ def format_price(price):
 def display_dish_name(dish):
     """Give unnamed dishes a readable presentation-only label."""
     return dish.get("dish") or "Unnamed dish"
+
+
+def build_dish_candidates(matches):
+    """Flatten Python match results for the shared dish-wheel presentation."""
+    candidates = []
+    for restaurant, dishes in matches:
+        for dish in dishes:
+            candidates.append(
+                {
+                    "index": len(candidates),
+                    "restaurant": restaurant,
+                    "dish": dish,
+                }
+            )
+    return candidates

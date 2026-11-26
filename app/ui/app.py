@@ -6,10 +6,11 @@ from tkinter import ttk
 
 from app.constants import CATEGORIES, CUISINES
 from app.logic.filter import list_matches
-from app.logic.pick import choose_restaurant
+from app.logic.pick import choose_restaurant, pick_restaurant
 from app.sample.restaurants import SAMPLE_RESTAURANTS
 from app.ui.components import (
     ChoiceChip,
+    MenuWheel,
     PrimaryButton,
     ScrollableFrame,
     SecondaryButton,
@@ -17,10 +18,11 @@ from app.ui.components import (
 from app.ui.presentation import (
     CATEGORY_LABELS,
     CUISINE_LABELS,
-    PRICE_OPTIONS,
+    build_dish_candidates,
     build_filters,
     display_dish_name,
     format_price,
+    format_price_limit,
 )
 from app.ui.theme import COLORS, SPACE, font
 
@@ -33,9 +35,17 @@ class WhatShouldWeEatApp:
         self.restaurants = restaurants if restaurants is not None else SAMPLE_RESTAURANTS
         self.cuisine_vars = {value: tk.BooleanVar(value=False) for value in CUISINES}
         self.category_vars = {value: tk.BooleanVar(value=False) for value in CATEGORIES}
-        self.price_var = tk.StringVar(value=next(iter(PRICE_OPTIONS)))
+        highest_price = max(
+            dish["price"]
+            for restaurant in self.restaurants
+            for dish in restaurant.get("menu", [])
+        )
+        self.price_ceiling = max(100, ((highest_price + 99) // 100) * 100)
+        self.price_var = tk.DoubleVar(value=self.price_ceiling)
+        self.price_label_var = tk.StringVar(value="Any price")
         self.match_count_var = tk.StringVar()
         self.status_var = tk.StringVar(value="Ready to pick your next meal")
+        self._price_refresh_job = None
 
         self._configure_window()
         self._configure_styles()
@@ -47,33 +57,24 @@ class WhatShouldWeEatApp:
         self.root.geometry("1180x780")
         self.root.minsize(880, 660)
         self.root.configure(background=COLORS["canvas"])
-        self.root.bind("<Return>", lambda _event: self.pick_restaurant())
+        self.root.bind("<Return>", lambda _event: self.spin_matches())
 
     def _configure_styles(self):
         style = ttk.Style(self.root)
         style.theme_use("clam")
         style.configure(
-            "Food.TCombobox",
-            fieldbackground=COLORS["surface_alt"],
-            background=COLORS["surface_alt"],
-            foreground=COLORS["ink"],
+            "Price.Horizontal.TScale",
+            background=COLORS["surface"],
+            troughcolor=COLORS["control_track"],
             bordercolor=COLORS["border"],
-            lightcolor=COLORS["surface_alt"],
-            darkcolor=COLORS["surface_alt"],
-            arrowcolor=COLORS["primary"],
-            padding=10,
-            font=font(11),
-        )
-        style.map(
-            "Food.TCombobox",
-            bordercolor=[("focus", COLORS["focus"])],
-            lightcolor=[("focus", COLORS["focus"])],
-            darkcolor=[("focus", COLORS["focus"])],
+            lightcolor=COLORS["control"],
+            darkcolor=COLORS["control"],
+            sliderlength=24,
         )
         style.configure(
             "Primary.TButton",
             background=COLORS["primary"],
-            foreground=COLORS["white"],
+            foreground=COLORS["primary_ink"],
             bordercolor=COLORS["primary"],
             lightcolor=COLORS["primary"],
             darkcolor=COLORS["primary"],
@@ -89,7 +90,7 @@ class WhatShouldWeEatApp:
                 ("pressed", COLORS["primary_hover"]),
                 ("active", COLORS["primary_hover"]),
             ],
-            foreground=[("disabled", COLORS["surface_alt"])],
+            foreground=[("disabled", COLORS["muted"])],
             bordercolor=[("focus", COLORS["focus"])],
             lightcolor=[("focus", COLORS["focus"])],
             darkcolor=[("focus", COLORS["focus"])],
@@ -116,7 +117,7 @@ class WhatShouldWeEatApp:
             width=4,
             height=2,
             background=COLORS["accent"],
-            foreground=COLORS["white"],
+            foreground=COLORS["accent_ink"],
             font=font(12, "bold"),
         )
         mark.grid(row=0, column=0, rowspan=2, sticky="w", padx=(0, SPACE["md"]))
@@ -143,7 +144,7 @@ class WhatShouldWeEatApp:
             stats,
             text=f"{len(self.restaurants)} restaurants  ·  {dish_count} dishes",
             background=COLORS["primary_soft"],
-            foreground=COLORS["primary"],
+            foreground=COLORS["primary_ink"],
             font=font(10, "bold"),
         ).pack()
 
@@ -188,17 +189,55 @@ class WhatShouldWeEatApp:
             font=font(10),
         ).grid(row=1, column=0, sticky="w", pady=(5, SPACE["lg"]))
 
-        self._section_label(body, "Budget per dish", 2)
-        price_box = ttk.Combobox(
-            body,
-            textvariable=self.price_var,
-            values=list(PRICE_OPTIONS),
-            state="readonly",
-            style="Food.TCombobox",
+        price_header = tk.Frame(body, background=COLORS["surface"])
+        price_header.grid(row=2, column=0, sticky="ew")
+        price_header.grid_columnconfigure(0, weight=1)
+        tk.Label(
+            price_header,
+            text="Maximum price",
+            background=COLORS["surface"],
+            foreground=COLORS["ink"],
+            font=font(11, "bold"),
+        ).grid(row=0, column=0, sticky="w")
+        tk.Label(
+            price_header,
+            textvariable=self.price_label_var,
+            background=COLORS["primary_soft"],
+            foreground=COLORS["primary_ink"],
+            font=font(9, "bold"),
+            padx=8,
+            pady=4,
+        ).grid(row=0, column=1, sticky="e")
+
+        price_control = tk.Frame(body, background=COLORS["surface"])
+        price_control.grid(row=3, column=0, sticky="ew", pady=(10, SPACE["lg"]))
+        price_control.grid_columnconfigure(0, weight=1)
+        self.price_slider = ttk.Scale(
+            price_control,
+            from_=0,
+            to=self.price_ceiling,
+            variable=self.price_var,
+            command=self._on_price_change,
+            orient="horizontal",
+            style="Price.Horizontal.TScale",
             cursor="hand2",
+            takefocus=True,
         )
-        price_box.grid(row=3, column=0, sticky="ew", pady=(8, SPACE["lg"]))
-        price_box.bind("<<ComboboxSelected>>", lambda _event: self.refresh_matches())
+        self.price_slider.grid(row=0, column=0, columnspan=2, sticky="ew")
+        tk.Label(
+            price_control,
+            text="฿0",
+            background=COLORS["surface"],
+            foreground=COLORS["muted"],
+            font=font(8),
+        ).grid(row=1, column=0, sticky="w", pady=(3, 0))
+        tk.Label(
+            price_control,
+            text=f"{format_price(self.price_ceiling)}+",
+            background=COLORS["surface"],
+            foreground=COLORS["muted"],
+            font=font(8),
+        ).grid(row=1, column=1, sticky="e", pady=(3, 0))
 
         self._section_label(body, "Cuisine", 4)
         cuisine_grid = tk.Frame(body, background=COLORS["surface"])
@@ -219,12 +258,22 @@ class WhatShouldWeEatApp:
             pady=SPACE["md"],
         )
         actions.grid(row=1, column=0, sticky="ew")
+        actions.grid_columnconfigure(0, weight=1)
         actions.grid_columnconfigure(1, weight=1)
-        SecondaryButton(actions, text="Reset", command=self.reset_filters).grid(
-            row=0, column=0, sticky="w", padx=(0, SPACE["sm"])
+        self.spin_matches_button = PrimaryButton(
+            actions, text="Spin my matches", command=self.spin_matches
         )
-        PrimaryButton(actions, text="Pick for me", command=self.pick_restaurant).grid(
-            row=0, column=1, sticky="ew"
+        self.spin_matches_button.grid(
+            row=0, column=0, columnspan=2, sticky="ew", pady=(0, SPACE["sm"])
+        )
+        self.surprise_button = SecondaryButton(
+            actions, text="Surprise me", command=self.surprise_me
+        )
+        self.surprise_button.grid(
+            row=1, column=0, sticky="ew", padx=(0, SPACE["sm"])
+        )
+        SecondaryButton(actions, text="Reset", command=self.reset_filters).grid(
+            row=1, column=1, sticky="ew"
         )
 
     def _section_label(self, parent, text, row):
@@ -266,7 +315,7 @@ class WhatShouldWeEatApp:
         title_row.grid_columnconfigure(0, weight=1)
         tk.Label(
             title_row,
-            text="Restaurants for you",
+            text="Matching restaurants",
             background=COLORS["canvas"],
             foreground=COLORS["ink"],
             font=font(17, "bold"),
@@ -291,30 +340,39 @@ class WhatShouldWeEatApp:
             self.result_card,
             text="Ready when you are",
             background=COLORS["primary"],
-            foreground="#CFE0D4",
+            foreground=COLORS["on_primary_muted"],
             font=font(9, "bold"),
         )
         self.result_eyebrow.grid(row=0, column=0, sticky="w")
         self.result_title = tk.Label(
             self.result_card,
-            text="Set your filters, then let us pick a restaurant",
-            wraplength=610,
+            text="Set your filters, then spin for a dish",
+            wraplength=430,
             justify="left",
             background=COLORS["primary"],
-            foreground=COLORS["white"],
+            foreground=COLORS["primary_ink"],
             font=font(16, "bold"),
         )
         self.result_title.grid(row=1, column=0, sticky="w", pady=(3, 2))
         self.result_detail = tk.Label(
             self.result_card,
             textvariable=self.status_var,
-            wraplength=610,
+            wraplength=430,
             justify="left",
             background=COLORS["primary"],
-            foreground="#E1EBE4",
+            foreground=COLORS["on_primary_muted"],
             font=font(10),
         )
         self.result_detail.grid(row=2, column=0, sticky="w")
+
+        self.menu_wheel = MenuWheel(self.result_card)
+        self.menu_wheel.grid(
+            row=0,
+            column=1,
+            rowspan=3,
+            sticky="e",
+            padx=(SPACE["lg"], 0),
+        )
 
         self.restaurant_list = ScrollableFrame(panel, background=COLORS["canvas"])
         self.restaurant_list.grid(row=2, column=0, sticky="nsew")
@@ -322,7 +380,16 @@ class WhatShouldWeEatApp:
     def current_filters(self):
         cuisines = [value for value, var in self.cuisine_vars.items() if var.get()]
         categories = [value for value, var in self.category_vars.items() if var.get()]
-        return build_filters(self.price_var.get(), cuisines, categories)
+        return build_filters(
+            self.price_var.get(), self.price_ceiling, cuisines, categories
+        )
+
+    def _on_price_change(self, value):
+        max_price = float(value)
+        self.price_label_var.set(format_price_limit(max_price, self.price_ceiling))
+        if self._price_refresh_job is not None:
+            self.root.after_cancel(self._price_refresh_job)
+        self._price_refresh_job = self.root.after(80, self.refresh_matches)
 
     def refresh_matches(self):
         matches = list_matches(self.restaurants, self.current_filters())
@@ -330,6 +397,12 @@ class WhatShouldWeEatApp:
             f"{len(matches)} of {len(self.restaurants)} restaurants"
         )
         self._render_restaurant_cards(matches)
+        eligible_dishes = [
+            display_dish_name(dish)
+            for _restaurant, dishes in matches
+            for dish in dishes
+        ]
+        self.menu_wheel.set_items(eligible_dishes)
         return matches
 
     def _render_restaurant_cards(self, matches):
@@ -378,7 +451,7 @@ class WhatShouldWeEatApp:
                 width=4,
                 height=2,
                 background=COLORS["accent_soft"],
-                foreground=COLORS["accent"],
+                foreground=COLORS["accent_ink"],
                 font=font(10, "bold"),
             )
             number.grid(row=0, column=0, rowspan=2, sticky="nw", padx=(0, SPACE["md"]))
@@ -404,30 +477,80 @@ class WhatShouldWeEatApp:
                 font=font(9),
             ).grid(row=1, column=1, sticky="w", pady=(5, 0))
 
-    def pick_restaurant(self):
+    def _filtered_dish_candidates(self, filters):
+        return build_dish_candidates(list_matches(self.restaurants, filters))
+
+    def spin_matches(self):
         filters = self.current_filters()
+        candidates = self._filtered_dish_candidates(filters)
+        selected = pick_restaurant(candidates, random.random())
+        if selected is None:
+            self._show_no_match()
+            return
+        self._start_dish_spin(candidates, selected, "Filtered menu matches")
+
+    def surprise_me(self):
         restaurant, dishes = choose_restaurant(
-            self.restaurants, filters, random.random()
+            self.restaurants, {}, random.random()
         )
         if restaurant is None:
-            self.result_eyebrow.configure(text="NO PICK YET")
-            self.result_title.configure(text="No restaurant matches every filter")
-            self.status_var.set("Reset one or more filters, then try again.")
+            self._show_no_match()
             return
 
-        preview = ", ".join(display_dish_name(dish) for dish in dishes[:3])
-        if len(dishes) > 3:
-            preview = f"{preview}, plus {len(dishes) - 3} more"
-        self.result_eyebrow.configure(text="YOUR PICK")
-        self.result_title.configure(text=restaurant["name"])
-        self.status_var.set(preview)
+        candidates = [
+            {"index": index, "restaurant": restaurant, "dish": dish}
+            for index, dish in enumerate(dishes)
+        ]
+        selected = pick_restaurant(candidates, random.random())
+        self._start_dish_spin(candidates, selected, "A surprise from the full list")
+
+    def _start_dish_spin(self, candidates, selected, helper_text):
+        if self.menu_wheel.spinning:
+            return
+
+        self.menu_wheel.set_items(
+            [display_dish_name(candidate["dish"]) for candidate in candidates]
+        )
+        self._set_spin_buttons("disabled")
+        self.result_eyebrow.configure(text="SPINNING THE WHEEL")
+        self.result_title.configure(text="Finding your dish...")
+        self.status_var.set(helper_text)
+
+        def finish():
+            self._show_dish_result(selected)
+            self._set_spin_buttons("normal")
+
+        self.menu_wheel.animate_to(selected["index"], finish)
+
+    def _show_dish_result(self, selected):
+        dish = selected["dish"]
+        restaurant = selected["restaurant"]
+        self.result_eyebrow.configure(text="YOUR MENU")
+        self.result_title.configure(text=display_dish_name(dish))
+        self.status_var.set(
+            f"{restaurant['name']}  ·  {format_price(dish['price'])}"
+        )
+
+    def _show_no_match(self):
+        self.menu_wheel.set_items([])
+        self.result_eyebrow.configure(text="NO MENU YET")
+        self.result_title.configure(text="No dish matches every filter")
+        self.status_var.set("Reset one or more filters, then try again.")
+
+    def _set_spin_buttons(self, state):
+        self.spin_matches_button.configure(state=state)
+        self.surprise_button.configure(state=state)
 
     def reset_filters(self):
-        self.price_var.set(next(iter(PRICE_OPTIONS)))
+        self.price_var.set(self.price_ceiling)
+        self.price_label_var.set("Any price")
+        if self._price_refresh_job is not None:
+            self.root.after_cancel(self._price_refresh_job)
+            self._price_refresh_job = None
         for variable in (*self.cuisine_vars.values(), *self.category_vars.values()):
             variable.set(False)
         self.result_eyebrow.configure(text="Ready when you are")
-        self.result_title.configure(text="Set your filters, then let us pick a restaurant")
+        self.result_title.configure(text="Set your filters, then spin for a dish")
         self.status_var.set("Ready to pick your next meal")
         self.refresh_matches()
 

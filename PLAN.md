@@ -22,10 +22,9 @@ A user adds a few restaurants, closes and reopens the app, chooses filters (pric
   dishes.
 
 ## Progress and revisions
-- [date] Step 1 — [status]
-- 2026-11-26 — Step 7 complete: desktop frontend implemented with tkinter;
-  existing filter and pick modules unchanged; no new dependency.
-- 2026-11-26 — English release complete: translated all restaurant and dish
-  content, change the complete interface to English, expand the fixed category
-  list to the 15 requested values, and validated the result for push to
-  `origin/main`.
+- 2026-11-26 — Picker UI complete: added the price slider, multi-select filters,
+  filtered/surprise actions and dish-wheel animation without changing logic.
+- 2026-11-26 — Web runtime complete: the Python adapter calls the existing
+  filter/pick functions; JavaScript handles only DOM updates and animation.
+- 2026-11-26 — Visual revision complete: finalized white primary surfaces, a
+  gray slider, supporting pastel accents and native scrolling.
