@@ -1,3 +1,19 @@
 CUISINES = ["thai", "japanese", "chinese", "korean", "western", "other"]
 
-CATEGORIES = ["noodles", "rice", "fast food", "drinks", "dessert"]
+CATEGORIES = [
+    "rice",
+    "noodles",
+    "soup",
+    "curry",
+    "sushi",
+    "shabu",
+    "bbq",
+    "seafood",
+    "salad",
+    "fast food",
+    "snacks",
+    "bakery",
+    "dessert",
+    "drinks",
+    "other",
+]

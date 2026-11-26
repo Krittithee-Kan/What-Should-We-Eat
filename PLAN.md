@@ -14,7 +14,18 @@ A user adds a few restaurants, closes and reopens the app, chooses filters (pric
 8. Animation that lands on the picked restaurant; user feedback session; fixes. (Frontend member, reviewed by Krittithee)
 
 ## Plan review
-[What you changed or confirmed in this plan, and why — your own words]
+- 2026-11-26 — Confirmed Step 7 as the current scope. The frontend will use
+  Python's built-in `tkinter`, call the existing filter and pick functions, and
+  leave all behaviour rules and logic modules unchanged. The first screen will
+  support choosing price, cuisine and category filters, browsing the matching
+  restaurants, and showing a randomly picked restaurant with its matching
+  dishes.
 
 ## Progress and revisions
 - [date] Step 1 — [status]
+- 2026-11-26 — Step 7 complete: desktop frontend implemented with tkinter;
+  existing filter and pick modules unchanged; no new dependency.
+- 2026-11-26 — English release complete: translated all restaurant and dish
+  content, change the complete interface to English, expand the fixed category
+  list to the 15 requested values, and validated the result for push to
+  `origin/main`.

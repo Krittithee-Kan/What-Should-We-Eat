@@ -25,10 +25,12 @@
 ## Setup, run and test
 - Runtime versions and dependencies: Python [version — check with `python --version`]; libraries in `requirements.txt`.
 - Install: `pip install -r requirements.txt`
-- Run: [command — depends on the UI tool we choose]
+- Run: `python -m app.main`
 - Test: `pytest`
-- Sample data: [how to load the sample list]
+- Sample data: `app/sample/restaurants.py` includes 19 restaurants and 266
+  dishes with English display names; the desktop app loads it automatically.
 
 ## Reused work and limitations
-- Libraries, starter templates, code and assets: pytest (testing). [add others as we use them]
+- Libraries, starter templates, code and assets: pytest (testing); tkinter
+  (Python standard-library desktop UI).
 - Known limitations: [what users should know]
