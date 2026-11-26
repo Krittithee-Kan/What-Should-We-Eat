@@ -7,7 +7,7 @@ A user adds a few restaurants, closes and reopens the app, chooses filters (pric
 1. Project setup: folders, `requirements.txt`, pytest working. Check: `pytest` runs. (Krittithee)
 2. Sample list in `app/sample/restaurants.py`, including noodles 50, noodles 60, rice 45. (Krittithee)
 3. `filter_restaurants` + tests for the strict price rule, no match, one match and combined filters. Check: `pytest tests/test_filter.py`. (Krittithee, Third member (test))
-4. `pick_restaurant` + tests using fixed random numbers and an empty list. Check: `pytest tests/test_pick.py`. (Krittithee)
+4. `pick_restaurant` + tests using fixed random numbers and an empty list. Check: `pytest tests/test_pick.py`. (Krittithee, Third member (test))
 5. `validate_restaurant` + tests for good and rejected input. Check: `pytest tests/test_validate.py`. (Third member)
 6. Storage: load/save/add/update/delete with a JSON file + tests for reopen, rejected input and damaged files. Check: `pytest tests/test_storage.py`. (Third member)
 7. Basic screens calling these functions, result shown as text. Check: manual walkthrough in EVIDENCE.md. (Frontend member)
