@@ -18,7 +18,7 @@
   - A restaurant matches only if at least one single dish passes all chosen filters by itself.
   - If nothing matches, the app says so and does not pick anything. It never drops a filter to force a result.
   - The user can choose any filters they want: one, several, or none. Filters that are not chosen are ignored.
-  - When adding a restaurant: a restaurant name and at least one dish are required; each dish needs a cuisine, a category and a price above 0. A dish name is optional. Invalid input is rejected and the saved list does not change.
+  - When adding a restaurant: a restaurant name and at least one dish are required; each dish needs a cuisine, a category and a price above or equal to 0. A dish name is optional. Invalid input is rejected and the saved list does not change.
   - A damaged save file does not crash the app; broken entries are skipped and the user is told how many.
 - Simulations and exclusions: one computer, one saved list, no accounts, no maps or distance (we don't know where the user is), no online voting, no runtime AI. Restaurant data is typed in by hand.
 
