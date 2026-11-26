@@ -29,3 +29,4 @@ A user adds a few restaurants, closes and reopens the app, chooses filters (pric
 - 2026-11-26 — Visual revision complete: finalized white primary surfaces, a
   gray slider, pink/yellow action buttons and native scrolling.
 - 2026-11-26 — Tests revision due to a new better sample data. Changed one rule about the invalid price of 0 in `README.md` as we now accept price of 0 as a valid one.
+- 2026-11-26 — 4 tests are created, checked, polished, re-checked, and confirmed: `test_filter.py`, `test_pick.py`, `test_validate.py`, and `test_storage.py`. (`test_sample_restaurants.py` and `EVIDENCE.md` have been updated for the new sample data and tests).
