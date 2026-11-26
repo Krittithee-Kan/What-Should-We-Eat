@@ -1,1 +1,3 @@
-FOOD_TYPES = ["noodles", "rice", "fast food", "drinks"]
+CUISINES = ["thai", "japanese", "chinese", "korean", "western", "other"]
+
+CATEGORIES = ["noodles", "rice", "fast food", "drinks", "dessert"]
