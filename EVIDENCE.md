@@ -4,7 +4,7 @@
 
 ### Data and Python logic
 
-- Sample data contains 19 restaurants and 266 English-named dishes.
+- Sample data contains 200 restaurants and 1,784 English-named dishes.
 - The 15 supported categories match `app/constants.py`.
 - Five focused filter tests cover empty filters, inclusive price, cuisine,
   category, combined same-dish matching and no-match behaviour.
@@ -35,6 +35,8 @@
 
 - Duplicate JavaScript filter/pick logic and its test file were removed.
 - Low-contrast colour pairs were adjusted and rechecked.
+- Tests needed to be revisited due to a change in sample data size.
+- Changed one rule in `README.md` as we now accept price of 0 (and above) as a valid one. Only negative value is invalid.
 
 ## Member contributions
 
