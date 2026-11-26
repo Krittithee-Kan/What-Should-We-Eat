@@ -4,7 +4,7 @@
 - Members:
   - Krittithee Kanjanapinchote — 6580988 — Krittithee-Kan
   - Siriphanaphon Sirikun — 6680085 — Blimmy
-  - Napat Oonsamatham — [student ID] — [GitHub username]
+  - Napat Oonsamatham — 6680964 — napat-oon
 - Intended users and problem: [who needs this and why, in your own words]
 
 ## Core workflow and scope
