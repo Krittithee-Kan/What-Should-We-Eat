@@ -6,7 +6,7 @@ from app.sample.restaurants import SAMPLE_RESTAURANTS
 
 @pytest.mark.parametrize(
     ("random_number", "expected_index"),
-    [(0, 0), (0.5, 9), (0.999999, 18)],
+    [(0, 0), (0.5, 100), (0.999999, 199)],
 )
 def test_pick_restaurant_selects_deterministic_sample_positions(
     random_number, expected_index
@@ -36,15 +36,15 @@ def test_choose_restaurant_returns_a_filtered_restaurant_and_its_matching_dishes
         0,
     )
 
-    assert restaurant["id"] == "r1"
+    assert restaurant["id"] == "r5"
     assert [dish["dish"] for dish in dishes] == [
-        "Hong Kong-style stir-fried noodles"
+        "Hong Kong-style Noodles"
     ]
 
 
 def test_choose_restaurant_returns_no_result_when_filters_match_nothing():
     assert choose_restaurant(
         SAMPLE_RESTAURANTS,
-        {"categories": ["sushi"]},
+        {"cuisines": ["thai"], "categories": ["curry"]},
         0,
     ) == (None, [])
