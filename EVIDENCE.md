@@ -26,7 +26,7 @@
 
 ## Commands and results
 
-- `uv run --with pytest pytest -q` — 13 passed.
+- `uv run --with pytest pytest -q` — 62 passed.
 - `git diff --check` — passed.
 - `python -m app.web` — served the app at `http://localhost:5173`.
 - HTTP smoke check — page, matches, filtered spin and surprise returned 200.
