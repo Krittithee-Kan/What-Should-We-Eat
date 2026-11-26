@@ -1,8 +1,13 @@
-from app.ui.presentation import build_filters, display_dish_name, format_price
+from app.ui.presentation import (
+    build_filters,
+    display_dish_name,
+    format_price,
+    format_price_limit,
+)
 
 
 def test_build_filters_with_no_active_constraints():
-    assert build_filters("Any price", [], []) == {
+    assert build_filters(1000, 1000, [], []) == {
         "max_price": None,
         "cuisines": [],
         "categories": [],
@@ -10,11 +15,21 @@ def test_build_filters_with_no_active_constraints():
 
 
 def test_build_filters_preserves_selected_values():
-    assert build_filters("Up to ฿150", ["thai"], ["rice", "noodles"]) == {
-        "max_price": 150,
-        "cuisines": ["thai"],
+    assert build_filters(
+        147.8,
+        1000,
+        ["thai", "japanese"],
+        ["rice", "noodles"],
+    ) == {
+        "max_price": 147,
+        "cuisines": ["thai", "japanese"],
         "categories": ["rice", "noodles"],
     }
+
+
+def test_format_price_limit_tracks_the_slider():
+    assert format_price_limit(147.8, 1000) == "Up to ฿147"
+    assert format_price_limit(1000, 1000) == "Any price"
 
 
 def test_format_price_as_whole_baht():

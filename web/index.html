@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>What Should We Eat?</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true">WE</div>
+        <div class="brand-copy">
+          <h1>What Should We Eat?</h1>
+          <p>Make your next meal an easy decision</p>
+        </div>
+        <div class="dataset-count" id="dataset-count">Loading restaurants…</div>
+      </header>
+
+      <main class="workspace">
+        <aside class="filters" aria-label="Restaurant filters">
+          <div class="filter-scroll">
+            <h2>What are you craving?</h2>
+            <p class="intro">Choose as many as you like, or leave everything open.</p>
+
+            <section class="filter-section" aria-labelledby="price-heading">
+              <div class="section-heading">
+                <h3 id="price-heading">Maximum price</h3>
+                <output id="price-output" for="price-slider">Any price</output>
+              </div>
+              <input id="price-slider" type="range" min="0" max="1000" value="1000" step="1" />
+              <div class="range-labels"><span>฿0</span><span id="price-ceiling">฿1,000+</span></div>
+            </section>
+
+            <section class="filter-section" aria-labelledby="cuisine-heading">
+              <h3 id="cuisine-heading">Cuisine</h3>
+              <div class="chip-grid" id="cuisine-chips"></div>
+            </section>
+
+            <section class="filter-section" aria-labelledby="category-heading">
+              <h3 id="category-heading">Dish type</h3>
+              <div class="chip-grid" id="category-chips"></div>
+            </section>
+          </div>
+
+          <div class="filter-actions">
+            <button class="button button-primary" id="spin-matches" type="button">Spin my matches</button>
+            <div class="secondary-actions">
+              <button class="button button-secondary" id="surprise" type="button">Surprise me</button>
+              <button class="button button-secondary" id="reset" type="button">Reset</button>
+            </div>
+          </div>
+        </aside>
+
+        <section class="results" aria-labelledby="results-heading">
+          <div class="results-heading-row">
+            <h2 id="results-heading">Matching restaurants</h2>
+            <p id="match-count" aria-live="polite"></p>
+          </div>
+
+          <section class="result-card" aria-live="polite" aria-atomic="true">
+            <div class="result-copy">
+              <p class="eyebrow" id="result-eyebrow">Ready when you are</p>
+              <h2 id="result-title">Set your filters, then spin for a dish</h2>
+              <p id="result-detail">Ready to pick your next meal</p>
+            </div>
+            <div class="wheel-stage" aria-hidden="true">
+              <div class="wheel-pointer"></div>
+              <div class="wheel" id="wheel"></div>
+              <div class="wheel-center"><strong id="wheel-count">0</strong><span>DISHES</span></div>
+            </div>
+          </section>
+
+          <div class="restaurant-list" id="restaurant-list" tabindex="0" aria-label="Matching restaurant list"></div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

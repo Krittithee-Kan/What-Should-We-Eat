@@ -2,10 +2,20 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
 
 # Virtual environments
 venv/
 .venv/
+.env
+.env.*
+
+# Runtime output
+*.log
 
 # The app's saved restaurant list (each person's own data, not code)
 saved/

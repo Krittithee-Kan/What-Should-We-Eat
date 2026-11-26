@@ -3,7 +3,7 @@
 ## Team and purpose
 - Members:
   - Krittithee Kanjanapinchote — 6580988 — Krittithee-Kan
-  - Siriphanaphon Sirikun — [student ID] — [GitHub username]
+  - Siriphanaphon Sirikun — 6680085 — Blimmy
   - Napat Oonsamatham — [student ID] — [GitHub username]
 - Intended users and problem: [who needs this and why, in your own words]
 
@@ -23,14 +23,16 @@
 - Simulations and exclusions: one computer, one saved list, no accounts, no maps or distance (we don't know where the user is), no online voting, no runtime AI. Restaurant data is typed in by hand.
 
 ## Setup, run and test
-- Runtime versions and dependencies: Python [version — check with `python --version`]; libraries in `requirements.txt`.
+- Runtime versions and dependencies: Python; libraries are listed in
+  `requirements.txt`. The web server uses only the Python standard library.
 - Install: `pip install -r requirements.txt`
-- Run: `python -m app.main`
+- Run web app: `python -m app.web`, then open `http://localhost:5173`
+- Run desktop app: `python -m app.main`
 - Test: `pytest`
 - Sample data: `app/sample/restaurants.py` includes 19 restaurants and 266
   dishes with English display names; the desktop app loads it automatically.
 
 ## Reused work and limitations
 - Libraries, starter templates, code and assets: pytest (testing); tkinter
-  (Python standard-library desktop UI).
+  (desktop UI); Python's built-in HTTP server (web UI).
 - Known limitations: [what users should know]
