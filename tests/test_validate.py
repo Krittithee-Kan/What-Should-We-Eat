@@ -1,6 +1,7 @@
 import pytest
 
 from app.data.validate import validate_restaurant
+from app.sample.restaurants import SAMPLE_RESTAURANTS
 
 
 def _valid_dish(**overrides):
@@ -139,13 +140,24 @@ def test_accepts_the_smallest_positive_whole_number_price():
     ) == []
 
 
-def test_rejects_a_zero_price_under_the_documented_rule():
-    errors = validate_restaurant(
+def test_accepts_a_zero_price():
+    assert validate_restaurant(
         _valid_restaurant(menu=[_valid_dish(price=0)])
-    )
+    ) == []
 
-    assert errors
-    assert any("price" in error for error in errors)
+
+def test_accepts_every_restaurant_in_the_current_sample():
+    validation_results = [
+        (restaurant["id"], validate_restaurant(restaurant))
+        for restaurant in SAMPLE_RESTAURANTS
+    ]
+    invalid_restaurants = {
+        restaurant_id: errors
+        for restaurant_id, errors in validation_results
+        if errors
+    }
+
+    assert invalid_restaurants == {}
 
 
 def test_reports_multiple_errors_with_each_dish_position():
