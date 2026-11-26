@@ -13,8 +13,8 @@ def _contains_thai_letters_or_digits(text):
 
 
 def test_sample_dataset_is_complete_and_english():
-    assert len(SAMPLE_RESTAURANTS) == 19
-    assert sum(len(restaurant["menu"]) for restaurant in SAMPLE_RESTAURANTS) == 266
+    assert len(SAMPLE_RESTAURANTS) == 200
+    assert sum(len(restaurant["menu"]) for restaurant in SAMPLE_RESTAURANTS) == 1784
 
     content = [restaurant["name"] for restaurant in SAMPLE_RESTAURANTS]
     content.extend(
