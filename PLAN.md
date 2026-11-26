@@ -27,4 +27,4 @@ A user adds a few restaurants, closes and reopens the app, chooses filters (pric
 - 2026-11-26 — Web runtime complete: the Python adapter calls the existing
   filter/pick functions; JavaScript handles only DOM updates and animation.
 - 2026-11-26 — Visual revision complete: finalized white primary surfaces, a
-  gray slider, supporting pastel accents and native scrolling.
+  gray slider, pink/yellow action buttons and native scrolling.

@@ -18,6 +18,12 @@ COLORS = {
     "focus": "#737373",
     "control": "#737373",
     "control_track": "#E5E5E5",
+    "spin_button": "#FCE7F3",
+    "spin_button_hover": "#FBD9E9",
+    "spin_button_ink": "#6A2F48",
+    "surprise_button": "#FFF9E8",
+    "surprise_button_hover": "#FFF3C4",
+    "surprise_button_ink": "#6B591F",
     "on_primary_muted": "#675C62",
     "white": "#FFFFFF",
 }
