@@ -56,6 +56,13 @@
   was too tall and the macOS native button reduced primary-action contrast.
   Chips were changed to three columns and the primary action moved to a themed
   ttk style; the second visual pass confirmed both fixes.
+  
+### Filter Test
+- Behaviour being checked: `app/logic/filter.py`: `filter_restaurants` — five focused tests covering no filters, the inclusive 60-baht limit, cuisine/category filters, same-dish combined matching, and no matches.
+- Expected outcome, written before AI-generated test code: the results contain only restaurants that match with every chosen filter by ID (or none if zero match).
+- Test reference and command, or manual steps: `uv run --with pytest pytest -q tests/test_filter.py`
+- Actual result: 5 tests passed.
+- Correction and rerun, if needed: Data was changed mid-testing, so the tests were updated to assess more new restaurants.
 
 ## Member contributions
 ### Krittithee Kanjanapinchote
@@ -80,9 +87,9 @@
 - Supporting evidence: [pending]
 
 ## AI use
-- Tools used: Codex, ui-ux-pro-max design guidance, pytest.
+- Tools used: Codex, ui-ux-pro-max design guidance, pytest, GitHub Copilot.
 - How they helped: planned and implemented the presentation layer, checked
-  accessibility and layout details, and ran repeatable UI-adapter tests.
+  accessibility and layout details, and ran repeatable UI-adapter tests. GitHub Copilot for planning and implementation for filter tests.
 
 ## User feedback
 Pending.
