@@ -28,3 +28,4 @@ A user adds a few restaurants, closes and reopens the app, chooses filters (pric
   filter/pick functions; JavaScript handles only DOM updates and animation.
 - 2026-11-26 — Visual revision complete: finalized white primary surfaces, a
   gray slider, pink/yellow action buttons and native scrolling.
+- 2026-11-26 — Tests revision due to a new better sample data. Changed one rule about the invalid price of 0 in `README.md` as we now accept price of 0 as a valid one.
