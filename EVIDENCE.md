@@ -19,6 +19,8 @@
 - Desktop and browser interfaces loaded successfully.
 - Main surfaces are white and the slider is gray; pastel colours remain small
   accents.
+- Spin uses pastel pink and Surprise uses pastel yellow; button contrast is at
+  least 6.14:1.
 - Browser scrolling and interaction passed; localhost returned HTTP 200.
 - Text contrast is at least 6.39:1 and gray-slider contrast is 4.74:1.
 

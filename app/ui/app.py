@@ -73,11 +73,11 @@ class WhatShouldWeEatApp:
         )
         style.configure(
             "Primary.TButton",
-            background=COLORS["primary"],
-            foreground=COLORS["primary_ink"],
-            bordercolor=COLORS["primary"],
-            lightcolor=COLORS["primary"],
-            darkcolor=COLORS["primary"],
+            background=COLORS["spin_button"],
+            foreground=COLORS["spin_button_ink"],
+            bordercolor=COLORS["spin_button_hover"],
+            lightcolor=COLORS["spin_button"],
+            darkcolor=COLORS["spin_button"],
             focuscolor=COLORS["focus"],
             focusthickness=2,
             font=font(12, "bold"),
@@ -87,8 +87,8 @@ class WhatShouldWeEatApp:
         style.map(
             "Primary.TButton",
             background=[
-                ("pressed", COLORS["primary_hover"]),
-                ("active", COLORS["primary_hover"]),
+                ("pressed", COLORS["spin_button_hover"]),
+                ("active", COLORS["spin_button_hover"]),
             ],
             foreground=[("disabled", COLORS["muted"])],
             bordercolor=[("focus", COLORS["focus"])],
@@ -268,6 +268,12 @@ class WhatShouldWeEatApp:
         )
         self.surprise_button = SecondaryButton(
             actions, text="Surprise me", command=self.surprise_me
+        )
+        self.surprise_button.configure(
+            background=COLORS["surprise_button"],
+            foreground=COLORS["surprise_button_ink"],
+            activebackground=COLORS["surprise_button_hover"],
+            activeforeground=COLORS["surprise_button_ink"],
         )
         self.surprise_button.grid(
             row=1, column=0, sticky="ew", padx=(0, SPACE["sm"])
