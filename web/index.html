@@ -15,7 +15,10 @@
           <h1>What Should We Eat?</h1>
           <p>Make your next meal an easy decision</p>
         </div>
-        <div class="dataset-count" id="dataset-count">Loading restaurants…</div>
+        <div class="topbar-actions">
+          <div class="dataset-count" id="dataset-count">Loading restaurants…</div>
+          <button class="button button-secondary manage-open" id="manage-open" type="button">Manage restaurants</button>
+        </div>
       </header>
 
       <main class="workspace">
@@ -76,6 +79,30 @@
         </section>
       </main>
     </div>
+    <dialog class="manage-dialog" id="manage-dialog" aria-labelledby="manage-heading">
+      <div class="manage-header">
+        <h2 id="manage-heading">Manage restaurants</h2>
+        <button class="button button-secondary" id="manage-close" type="button">Close</button>
+      </div>
+      <p class="manage-notice" id="manage-notice" role="status" hidden></p>
+
+      <form class="add-form" id="add-form" novalidate>
+        <h3>Add a restaurant</h3>
+        <label class="field">
+          <span>Restaurant name</span>
+          <input id="add-name" type="text" autocomplete="off" />
+        </label>
+        <div class="dish-rows" id="dish-rows"></div>
+        <ul class="form-errors" id="form-errors" hidden></ul>
+        <div class="add-actions">
+          <button class="button button-secondary" id="add-dish" type="button">+ Add another dish</button>
+          <button class="button button-primary" type="submit">Save restaurant</button>
+        </div>
+      </form>
+
+      <h3 class="saved-heading">Saved restaurants</h3>
+      <ul class="manage-list" id="manage-list"></ul>
+    </dialog>
     <script type="module" src="/app.js"></script>
   </body>
 </html>

@@ -202,6 +202,204 @@ elements.surprise.addEventListener("click", () => {
 });
 elements.reset.addEventListener("click", resetFilters);
 
+const manage = Object.fromEntries([
+  "manage-open", "manage-dialog", "manage-close", "manage-notice", "add-form",
+  "add-name", "dish-rows", "add-dish", "form-errors", "manage-list",
+].map((id) => [id, document.getElementById(id)]));
+
+function showStorageNotice(message) {
+  elements["result-eyebrow"].textContent = "SAVED LIST";
+  elements["result-title"].textContent = "Some saved data could not be loaded";
+  elements["result-detail"].textContent = message;
+}
+
+function setNotice(message) {
+  manage["manage-notice"].textContent = message;
+  manage["manage-notice"].hidden = !message;
+}
+
+function createSelect(choices, className) {
+  const select = document.createElement("select");
+  select.className = className;
+  choices.forEach(({ value, label }) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    select.append(option);
+  });
+  return select;
+}
+
+function labelled(text, control) {
+  const label = document.createElement("label");
+  label.className = "field";
+  const caption = document.createElement("span");
+  caption.textContent = text;
+  label.append(caption, control);
+  return label;
+}
+
+function updateRemoveButtons() {
+  const rows = manage["dish-rows"].querySelectorAll(".dish-row");
+  rows.forEach((row) => {
+    row.querySelector(".remove-dish").disabled = rows.length === 1;
+  });
+}
+
+function addDishRow() {
+  const row = document.createElement("div");
+  row.className = "dish-row";
+
+  const name = document.createElement("input");
+  name.type = "text";
+  name.className = "dish-name";
+  name.placeholder = "Optional";
+
+  const price = document.createElement("input");
+  price.type = "number";
+  price.min = "0";
+  price.step = "1";
+  price.className = "dish-price";
+
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "button button-secondary remove-dish";
+  remove.textContent = "Remove";
+  remove.addEventListener("click", () => {
+    row.remove();
+    updateRemoveButtons();
+  });
+
+  row.append(
+    labelled("Dish name", name),
+    labelled("Cuisine", createSelect(state.cuisineChoices, "dish-cuisine")),
+    labelled("Dish type", createSelect(state.categoryChoices, "dish-category")),
+    labelled("Price (฿)", price),
+    remove,
+  );
+  manage["dish-rows"].append(row);
+  updateRemoveButtons();
+}
+
+function resetAddForm() {
+  manage["add-name"].value = "";
+  manage["dish-rows"].replaceChildren();
+  addDishRow();
+  showFormErrors([]);
+}
+
+function readAddForm() {
+  return {
+    name: manage["add-name"].value,
+    menu: [...manage["dish-rows"].querySelectorAll(".dish-row")].map((row) => ({
+      dish: row.querySelector(".dish-name").value,
+      cuisine: row.querySelector(".dish-cuisine").value,
+      category: row.querySelector(".dish-category").value,
+      price: row.querySelector(".dish-price").value,
+    })),
+  };
+}
+
+function showFormErrors(errors) {
+  manage["form-errors"].replaceChildren();
+  errors.forEach((error) => {
+    const item = document.createElement("li");
+    item.textContent = error;
+    manage["form-errors"].append(item);
+  });
+  manage["form-errors"].hidden = errors.length === 0;
+}
+
+async function refreshDataset() {
+  const bootstrap = await requestJson("/api/bootstrap");
+  const slider = elements["price-slider"];
+  const wasAnyPrice = Number(slider.value) >= Number(slider.max);
+  state.priceCeiling = bootstrap.price_ceiling;
+  slider.max = String(state.priceCeiling);
+  if (wasAnyPrice) slider.value = String(state.priceCeiling);
+  elements["price-ceiling"].textContent = bootstrap.price_ceiling_label;
+  elements["dataset-count"].textContent = bootstrap.dataset_count;
+  await renderMatches();
+}
+
+async function renderManageList() {
+  const { restaurants } = await requestJson("/api/restaurants");
+  manage["manage-list"].replaceChildren();
+  restaurants.forEach((restaurant) => {
+    const item = document.createElement("li");
+    const copy = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = restaurant.name;
+    const meta = document.createElement("span");
+    meta.textContent = `${restaurant.dish_count} ${restaurant.dish_count === 1 ? "dish" : "dishes"}`;
+    copy.append(name, meta);
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "button button-secondary delete-restaurant";
+    remove.textContent = "Delete";
+    remove.addEventListener("click", () => deleteRestaurant(restaurant, remove));
+
+    item.append(copy, remove);
+    manage["manage-list"].append(item);
+  });
+}
+
+async function deleteRestaurant(restaurant, button) {
+  if (button.dataset.confirm !== "yes") {
+    button.dataset.confirm = "yes";
+    button.textContent = "Click again to delete";
+    button.classList.add("confirming");
+    return;
+  }
+  button.disabled = true;
+  try {
+    await requestJson("/api/restaurants/delete", { id: restaurant.id });
+    setNotice(`Deleted “${restaurant.name}”.`);
+    await renderManageList();
+    await refreshDataset();
+  } catch (error) {
+    setNotice(error.message);
+    button.disabled = false;
+  }
+}
+
+async function submitAddForm(event) {
+  event.preventDefault();
+  const response = await fetch("/api/restaurants/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(readAddForm()),
+  });
+  const body = await response.json();
+  if (!response.ok) {
+    showFormErrors(body.errors || [body.error || "The restaurant could not be saved."]);
+    return;
+  }
+  setNotice(`Saved “${body.name}”.`);
+  resetAddForm();
+  await renderManageList();
+  await refreshDataset();
+}
+
+async function openManage() {
+  setNotice("");
+  resetAddForm();
+  manage["manage-dialog"].showModal();
+  try {
+    await renderManageList();
+  } catch (error) {
+    setNotice(error.message);
+  }
+}
+
+manage["manage-open"].addEventListener("click", openManage);
+manage["manage-close"].addEventListener("click", () => manage["manage-dialog"].close());
+manage["add-dish"].addEventListener("click", addDishRow);
+manage["add-form"].addEventListener("submit", (event) => {
+  submitAddForm(event).catch((error) => showFormErrors([error.message]));
+});
+
 async function start() {
   const bootstrap = await requestJson("/api/bootstrap");
   state.priceCeiling = bootstrap.price_ceiling;
@@ -211,6 +409,7 @@ async function start() {
   elements["price-slider"].value = String(state.priceCeiling);
   elements["price-ceiling"].textContent = bootstrap.price_ceiling_label;
   elements["dataset-count"].textContent = bootstrap.dataset_count;
+  if (bootstrap.storage_message) showStorageNotice(bootstrap.storage_message);
   createChips(state.cuisineChoices, state.cuisines, elements["cuisine-chips"]);
   createChips(state.categoryChoices, state.categories, elements["category-chips"]);
   await renderMatches();
